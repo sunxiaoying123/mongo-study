@@ -549,17 +549,109 @@ db.workmate.find(
 { "name" : "DingLu", "age" : 20, "interest" : [ "做饭" ] }
 { "name" : "JiaPeng", "age" : 29, "interest" : [ "游泳" ] }
 { "name" : "LiJia", "age" : 26, "interest" : [ "篮球" ] }
-第七节 查询：find的参数使用方法
 
+### 第七节  查询：find的数组查询
+##### 先完善一波数据
+以前的我们的workmate集合对数组涉及还很少，现在在数据中加入了兴趣（interest），并且给每个人加入了一些兴趣，比如有写代码，做饭，看电影…..
+
+当然这些数据你可以自己随意构建，但是如果你不想自己费事费脑，这里也为你准备好了数据，你只要把以前的表删除（drop）掉，重新载入(load)就可以了。
+##### 1、数组的基本查询
+```
+// 查询多种兴趣的人
+db.workmate.find({interest:['画画','聚会','看电影']},
+    {name:1,interest:1,age:1,_id:0} 
+)
+{ "name" : "LiuYan", "age" : 35, "interest" : [ "画画", "聚会", "看电影" ] }
+```
+```
+// 查询兴趣中有看电影的人，切记：此处不能用中括号，否则一个都查不出来
+db.workmate.find({interest:'看电影'},
+    {name:1,interest:1,age:1,_id:0} 
+)
+{ "name" : "xiaoying", "age" : 33, "interest" : [ "看电影", "看书", "吃美食", "钓鱼", "旅游" ] }
+{ "name" : "ShengLei", "age" : 31, "interest" : [ "篮球", "看电影", "做饭" ] }
+{ "name" : "MinJie", "age" : 18, "interest" : [ "做饭", "画画", "看电影" ] }
+{ "name" : "LiuYan", "age" : 35, "interest" : [ "画画", "聚会", "看电影" ] }
+{ "name" : "DingLu", "age" : 20, "interest" : [ "美食", "看电影", "做饭" ] }
+```
+
+##### 2、$all数组多项查询
+```
+// 查询出喜欢看电影和看书的人员信息（必须全部满足）
+db.workmate.find(
+  {interest:{$all:['看电影', '看书']}},
+  {name: 1, interest:1, age: 1,_id:0}
+)
+{ "name" : "xiaoying", "age" : 33, "interest" : [ "看电影", "看书", "吃美食", "钓鱼", "旅游" ] }
+```
+##### 3、$in-数组的或者查询
+```
+// 满足其一即可
+db.workmate.find(
+    {interest:{$in:["看电影","看书"]}},
+    {name:1,interest:1,age:1,_id:0} 
+)
+{ "name" : "xiaoying", "age" : 33, "interest" : [ "看电影", "看书", "吃美食", "钓鱼", "旅游" ] }
+{ "name" : "ShengLei", "age" : 31, "interest" : [ "篮球", "看电影", "做饭" ] }
+{ "name" : "MinJie", "age" : 18, "interest" : [ "做饭", "画画", "看电影" ] }
+{ "name" : "LiuYan", "age" : 35, "interest" : [ "画画", "聚会", "看电影" ] }
+{ "name" : "DingLu", "age" : 20, "interest" : [ "美食", "看电影", "做饭" ] }
+```
+##### 4、$size-数组个数查询
+```
+//查找兴趣的数量是5个人员信息
+db.workmate.find(
+    {interest:{$size:5}},
+    {name:1,interest:1,age:1,_id:0} 
+)
+{ "name" : "xiaoying", "age" : 33, "interest" : [ "看电影", "看书", "吃美食", "钓鱼", "旅游" ] }
+```
+##### 5、$slice-显示选项
+```
+// 显示兴趣的前两项
+db.workmate.find(
+    {},
+    {name:1,interest:{$slice:2},age:1,_id:0} 
+)
+{ "name" : "xiaoying", "age" : 33, "interest" : [ "看电影", "看书" ] }
+{ "name" : "ShengLei", "age" : 31, "interest" : [ "篮球", "看电影" ] }
+{ "name" : "MinJie", "age" : 18, "interest" : [ "做饭", "画画" ] }
+{ "name" : "XiaoWang", "age" : 25, "interest" : [ "写代码", "篮球" ] }
+{ "name" : "LiangPeng", "age" : 28, "interest" : [ "玩游戏", "写代码" ] }
+{ "name" : "HouFei", "age" : 25, "interest" : [ "化妆", "读书" ] }
+{ "name" : "LiuYan", "age" : 35, "interest" : [ "画画", "聚会" ] }
+{ "name" : "DingLu", "age" : 20, "interest" : [ "美食", "看电影" ] }
+{ "name" : "JiaPeng", "age" : 29, "interest" : [ "写代码", "篮球" ] }
+{ "name" : "LiJia", "age" : 26, "interest" : [ "玩游戏", "美食" ] }
+```
+```
+// 显示兴趣的最后一项
+db.workmate.find(
+    {},
+    {name:1,interest:{$slice:-1},age:1,_id:0} 
+）
+{ "name" : "xiaoying", "age" : 33, "interest" : [ "旅游" ] }
+{ "name" : "ShengLei", "age" : 31, "interest" : [ "做饭" ] }
+{ "name" : "MinJie", "age" : 18, "interest" : [ "看电影" ] }
+{ "name" : "XiaoWang", "age" : 25, "interest" : [ "画画" ] }
+{ "name" : "LiangPeng", "age" : 28, "interest" : [ "做饭" ] }
+{ "name" : "HouFei", "age" : 25, "interest" : [ "做饭" ] }
+{ "name" : "LiuYan", "age" : 35, "interest" : [ "看电影" ] }
+{ "name" : "DingLu", "age" : 20, "interest" : [ "做饭" ] }
+{ "name" : "JiaPeng", "age" : 29, "interest" : [ "游泳" ] }
+{ "name" : "LiJia", "age" : 26, "interest" : [ "篮球" ] }
+```
+### 第七节  查询：find的参数使用方法
 前面的find方法都是操作的第一个参数（query）和第二个参数（fields）,find还有其他的参数，这些参数多用在分页和排序上。
+##### find参数：
 
-find参数：
+* query：这个就是查询条件，MongoDB默认的第一个参数。
+* fields：（返回内容）查询出来后显示的结果样式，可以用true和false控制是否显示。
+* limit：返回的数量，后边跟数字，控制每次查询返回的结果数量。
+* skip:跳过多少个显示，和limit结合可以实现分页。
+* sort：排序方式，从小到大排序使用1，从大到小排序使用-1。
 
-query：这个就是查询条件，MongoDB默认的第一个参数。
-fields：（返回内容）查询出来后显示的结果样式，可以用true和false控制是否显示。
-limit：返回的数量，后边跟数字，控制每次查询返回的结果数量。
-skip:跳过多少个显示，和limit结合可以实现分页。
-sort：排序方式，从小到大排序使用1，从大到小排序使用-1。
+```
 // 分页 每页2条 年龄从小到大
 db.workmate.find({},{name:true,age:true,_id:false}).limit(2).skip(0).sort({age:1});
 { "name" : "MinJie", "age" : 18 }
@@ -568,6 +660,8 @@ db.workmate.find({},{name:true,age:true,_id:false}).limit(2).skip(0).sort({age:1
 db.workmate.find(   {},   {name:true,age:true,_id:false}).limit(2).skip(2).sort({age:1});
 { "name" : "XiaoWang", "age" : 25 }
 { "name" : "HouFei", "age" : 25 }
+```
+```
 // $where修饰符(慎用，会增加数据库压力和安全性会变重，工作中尽量少用)
 db.workmate.find(
   {$where:"this.age>30"},   
@@ -576,9 +670,11 @@ db.workmate.find(
 { "name" : "xiaoying", "age" : 33 }
 { "name" : "ShengLei", "age" : 31 }
 { "name" : "LiuYan", "age" : 35 }
-第八节 查询：find如何在js文本中使用
+```
+### 第八节  查询：find如何在js文本中使用
+>之前我们都是把代码粘贴到控制台执行，很麻烦，现在看下如何在js文件中执行吧~
 
-之前我们都是把代码粘贴到控制台执行，很麻烦，现在看下如何在js文件中执行吧~
+```
 // 游标hasNext
 var db = connect('company')
 var result = db.workmate.find()
@@ -614,8 +710,10 @@ MongoDB server version: 3.6.5
     ]
 }
 true
-第九节 索引:构造百万级数据
+```
 
+### 第九节 索引:构造百万级数据
+```
 // 生成随机数
 function getRandomNumber(mix, max) {
   var range = max - mix
@@ -661,6 +759,8 @@ for(let i = 0; i<2000000; i++){
 db.randomInfo.insert(tempInfo)
 var time = (new Date()).getTime()- startTime
 print('demo    .......'+ time)
+```
+```
 // 部分数据
 db.randomInfo.find({},{_id:0, userName:1,registTime:1,randNum0:1,randNum1:1})
 { "userName" : "0iq300q3ut", "registTime" : ISODate("2019-03-28T07:56:29.053Z"), "randNum0" : 70544, "randNum1" : 32916 }
@@ -705,8 +805,10 @@ Type "it" for more
 { "userName" : "6w5quu7t", "registTime" : ISODate("2019-03-28T07:56:29.064Z"), "randNum0" : 50544, "randNum1" : 81787 }
 { "userName" : "08q5u2wu", "registTime" : ISODate("2019-03-28T07:56:29.064Z"), "randNum0" : 93061, "randNum1" : 75591 }
 { "userName" : "tru6re3u9t", "registTime" : ISODate("2019-03-28T07:56:29.064Z"), "randNum0" : 40294, "randNum1" : 74792 }
-第十节 索引：索引入门
+```
 
+### 第十节 索引：索引入门
+```
 // 查询某个名字需要耗时多久？（以_id为索引）
 var startTime = new Date().getTime()  //得到程序运行的开始时间
 var  db = connect('company')          //链接数据库
@@ -733,8 +835,11 @@ db.randomInfo.getIndexes()
         "ns" : "company.randomInfo"
     }
 ]
-以下增加userName索引(查询时间会缩短很多，不同电脑可能相差时间还不一样，但是mongoDB限制64个索引)
-
+```
+***
+  以下增加userName索引(查询时间会缩短很多，不同电脑可能相差时间还不一样，但是mongoDB限制64个索引)
+***
+```
 // 建立userName的索引
 db.randomInfo.ensureIndex({userName: 1})
 // 查看索引，多出来userName
@@ -763,13 +868,15 @@ connecting to: mongodb://127.0.0.1:27017/company
 MongoDB server version: 3.6.5
 [SUCCESS]This run time is:1465ms
 true
-第十一节 索引： 复合索引
+```
 
-索引中的小坑
-数据不超万条时，不需要使用索引。性能的提升并不明显，而大大增加了内存和硬盘的消耗。
-查询数据超过表数据量30%时，不要使用索引字段查询。实际证明会比不使用索引更慢，因为它大量检索了索引表和我们原表。
-数字索引，要比字符串索引快的多，在百万级甚至千万级数据量面前，使用数字索引是个明确的选择。
-把你经常查询的数据做成一个内嵌数据（对象型的数据），然后集体进行索引。
+### 第十一节  索引： 复合索引
+>#### 索引中的小坑
+* 数据不超万条时，不需要使用索引。性能的提升并不明显，而大大增加了内存和硬盘的消耗。
+* 查询数据超过表数据量30%时，不要使用索引字段查询。实际证明会比不使用索引更慢，因为它大量检索了索引表和我们原表。
+* 数字索引，要比字符串索引快的多，在百万级甚至千万级数据量面前，使用数字索引是个明确的选择。
+* 把你经常查询的数据做成一个内嵌数据（对象型的数据），然后集体进行索引。
+```
 //现在把randNum0，这个字段也设置成索引
 db.randomInfo.ensureIndex({randNum0:1})
 // 复合查找
@@ -784,18 +891,21 @@ connecting to: mongodb://127.0.0.1:27017/company
 MongoDB server version: 3.6.5
 [SUCCESS]This run time is:7ms
 true
-1、hint(指定索引查询)
-
+```
+##### 1、hint(指定索引查询) 
+```
 // 指定用数字索引
 //现在数据量不大，时间看不出来差别，但是到工作中数据量很大的时候就会显示出来数字索引的优越性了
 var  rs = db.randomInfo.find({username:'7t8qut54',randNum0:23753}).hint({randNum0:1});
 
-2、删除索引
-
+```
+##### 2、删除索引
+```
 // 这里需要注意的是删除时填写的值，并不是我们的字段名称（key），而是我们索引查询表中的name值
 db.randomInfo.dropIndex('randNum0_1')
-第十二节 索引： 全文索引
-
+```
+### 第十二节  索引： 全文索引
+```
 db = connect('company')
 db.info.insert({contextInfo: "My am a programmer, I love family,I like my son"})
 db.info.insert({contextInfo: "My am a programmer, I play game and sing song"})
@@ -807,10 +917,11 @@ db.info.ensureIndex({contextInfo:'text'})
 // db.info.find({$text: {$search:"programmer -family"}})
 // 多个内容（play game和song）需要转义\
 db.info.find({$text: {$search:"\"play game\" song"}}
-第十三节 管理（用户的创建、删除、修改）
+```
 
-创建用户
-
+### 第十三节  管理（用户的创建、删除、修改）
+##### 创建用户
+```
 // 创建用户
 db.createUser({
   user:'xiaoying',
@@ -832,12 +943,14 @@ db.createUser({
 db.system.user.find()
 > db.system.users.find()
 { "_id" : "admin.xiaoying", "user" : "xiaoying", "db" : "admin", "credentials" : { "SCRAM-SHA-1" : { "iterationCount" : 10000, "salt" : "fSpRZZXvFQBGNm7Bh93wLA==", "storedKey" : "xOsYqOiHOKqrvcJuKO+b4LjT1To=", "serverKey" : "cjDAo+ui6xT9Bez5XXK/OCc5agw=" } }, "customData" : { "name" : "小英", "email" : "sun_xiao_ying@sina.com", "age" : 29 }, "roles" : [ { "role" : "readWrite", "db" : "company" }, { "role" : "read", "db" : "admin" } ] }
-删除用户
-
+```
+##### 删除用户
+```
 // 删除用户
 db.system.users.remove({user: 'xiaoying'})
-建权
-
+```
+##### 建权
+```
 db.auth("xiaoying",'1212')
 // 关闭服务
 db.shutdownServer()
@@ -847,8 +960,10 @@ db.shutdownServer()
 // 连接
 // mongo -u xiaoying -p 1212 127.0.0.1:27017/admin
 // mongo localhost:27017/admin -u xiaoying -p 1212
-第十四节：图形界面
+```
+
+### 第十四节：图形界面
 
 个人使用的是Robomogo,真正开发的时候还是以图形界面管理为主吧，看着毕竟直观，明了，操作简单~
 
-以上就是mongo的一些知识点的汇总了，希望能够对大家有所帮助，期待下次更新的时候就是结合mongo的项目分项了~ 2019-03-28记。
+>以上就是mongo的一些知识点的汇总了，希望能够对大家有所帮助，期待下次更新的时候就是结合mongo的项目分项了~  2019-03-28记。
